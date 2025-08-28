@@ -635,6 +635,25 @@ function_declaration_test_cases = [
         },
     ),
     (
+        "no_parameters",
+        types.FunctionDeclaration(
+            name="parameterless_function",
+            description="A function with no parameters",
+            parameters=None
+        ),
+        {
+            "type": "function",
+            "function": {
+                "name": "parameterless_function",
+                "description": "A function with no parameters",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                },
+            },
+        },
+    ),
+    (
         "nested_array",
         types.FunctionDeclaration(
             name="test_function_nested_array",
@@ -746,6 +765,31 @@ def test_function_declaration_to_tool_param(
       == expected_output
   )
 
+
+def test_function_declaration_to_tool_param_no_parameters():
+  """Test function declaration without parameters doesn't cause AttributeError."""
+  function_declaration = types.FunctionDeclaration(
+      name="parameterless_function",
+      description="A function with no parameters",
+      parameters=None  # This is what causes the bug
+  )
+  
+  result = _function_declaration_to_tool_param(function_declaration)
+  
+  expected = {
+      "type": "function",
+      "function": {
+          "name": "parameterless_function", 
+          "description": "A function with no parameters",
+          "parameters": {
+              "type": "object",
+              "properties": {},
+          },
+      },
+  }
+  
+  assert result == expected
+  # Most importantly: no AttributeError should be raised
 
 @pytest.mark.asyncio
 async def test_generate_content_async_with_system_instruction(
@@ -1548,3 +1592,4 @@ def test_get_completion_inputs_generation_params():
   # Should not include max_output_tokens
   assert "max_output_tokens" not in generation_params
   assert "stop_sequences" not in generation_params
+
